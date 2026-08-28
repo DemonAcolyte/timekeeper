@@ -1,0 +1,50 @@
+name: Deploy to DCISM
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dcism-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DCISM_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DCISM_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+
+      - name: Upload site
+        env:
+          DCISM_HOST: ${{ secrets.DCISM_HOST }}
+          DCISM_PORT: ${{ secrets.DCISM_PORT }}
+          DCISM_USER: ${{ secrets.DCISM_USER }}
+          DCISM_DEPLOY_PATH: ${{ secrets.DCISM_DEPLOY_PATH }}
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -p $DCISM_PORT -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            dist/ "$DCISM_USER@$DCISM_HOST:$DCISM_DEPLOY_PATH/"
