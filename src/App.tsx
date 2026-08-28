@@ -91,7 +91,7 @@ function App() {
   const selected = timers.find((timer) => timer.id === selectedId) ?? timers[0]
   const [draft, setDraft] = useState<Draft>(() => toDraft(selected))
   const remaining = getRemaining(selected, now)
-  const displayedTime = formatTime(remaining, selected.duration >= 3600)
+  const displayedTime = formatTime(remaining, remaining >= 3600)
   const timeParts = displayedTime.split(':')
 
   useEffect(() => {

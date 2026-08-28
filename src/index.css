@@ -17,9 +17,9 @@ button { cursor: pointer; }
 .theme-toggle svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .theme-toggle:hover, .theme-toggle:focus-visible { outline: none; opacity: .65; }
 kbd { margin-left: 5px; padding: 2px 5px; border: 1px solid var(--foreground); border-radius: 2px; color: var(--foreground); opacity: .65; font: 10px ui-monospace, monospace; }
-.timer-display { align-self: center; text-align: center; padding: 6vh 0; }
+.timer-display { align-self: center; width: 100%; container-type: inline-size; text-align: center; padding: 6vh 0; }
 .timer-name { margin: 0 0 clamp(12px, 2vh, 22px); color: var(--foreground); font-size: clamp(18px, 2vw, 30px); font-weight: 500; letter-spacing: -.02em; }
-.time { display: flex; align-items: center; justify-content: center; gap: clamp(10px, 1.5vw, 30px); color: var(--foreground); font: 700 clamp(84px, 19vw, 340px)/.78 Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums; }
+.time { display: flex; align-items: center; justify-content: center; gap: clamp(10px, 1.5cqi, 30px); color: var(--foreground); font: 700 clamp(84px, 19cqi, 340px)/.78 Arial, Helvetica, sans-serif; font-variant-numeric: tabular-nums; user-select: none; }
 .time-separator { margin-top: -.08em; }
 .time.expired { color: var(--foreground); opacity: .45; }
 .timer-status { margin: clamp(24px, 4vh, 48px) 0 0; color: var(--foreground); opacity: .55; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
