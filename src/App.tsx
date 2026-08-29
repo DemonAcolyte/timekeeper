@@ -1,4 +1,5 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
+import { importProgramPdf } from './programImport.ts'
 
 const STORAGE_KEY = 'timekeeper-state'
 const LEGACY_STORAGE_KEY = ['conference', 'timer', 'state'].join('-')
@@ -16,6 +17,8 @@ type Timer = {
 type Draft = { name: string; hours: string; minutes: string; seconds: string }
 
 type Theme = 'dark' | 'light'
+
+type ImportStatus = { kind: 'success' | 'error'; message: string } | null
 
 type SavedState = {
   timers: Timer[]
@@ -88,6 +91,9 @@ function App() {
   const [selectedId, setSelectedId] = useState(initialState.selectedId)
   const [theme, setTheme] = useState<Theme>(initialState.theme ?? 'dark')
   const [controlsVisible, setControlsVisible] = useState(true)
+  const [importing, setImporting] = useState(false)
+  const [importStatus, setImportStatus] = useState<ImportStatus>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [now, setNow] = useState(Date.now())
   const selected = timers.find((timer) => timer.id === selectedId) ?? timers[0]
   const [draft, setDraft] = useState<Draft>(() => toDraft(selected))
@@ -127,6 +133,10 @@ function App() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (importStatus?.kind === 'error') {
+        if (event.key === 'Escape') setImportStatus(null)
+        return
+      }
       if (event.target instanceof HTMLInputElement) {
         if (event.target.type === 'number' && event.key.toLowerCase() === 'h') {
           setControlsVisible((visible) => !visible)
@@ -199,6 +209,32 @@ function App() {
     }
   }
 
+  async function importPdf(file: File | undefined) {
+    if (!file) return
+
+    setImporting(true)
+    setImportStatus(null)
+    try {
+      const result = await importProgramPdf(file)
+      const importedTimers = result.durations.map((duration) => {
+        const minutes = duration / 60
+        const name = `${minutes} minute segment`
+        return { id: crypto.randomUUID(), name, duration, remaining: duration, running: false, endsAt: null } satisfies Timer
+      })
+      setTimers(importedTimers)
+      setSelectedId(importedTimers[0].id)
+      setDraft(toDraft(importedTimers[0]))
+      setNow(Date.now())
+      setImportStatus({ kind: 'success', message: `${result.sectionCount} sections read. ${importedTimers.length} timers created.` })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not read this PDF.'
+      setImportStatus({ kind: 'error', message })
+    } finally {
+      setImporting(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
   async function toggleFullscreen() {
     if (document.fullscreenElement) await document.exitFullscreen()
     else await document.documentElement.requestFullscreen()
@@ -214,6 +250,11 @@ function App() {
             <button className="remove-timer" type="button" onClick={() => removeTimer(timer.id)} disabled={timers.length === 1} aria-label={`Remove ${timer.name}`} title={timers.length === 1 ? 'At least one timer is required' : `Remove ${timer.name}`}>X</button>
           </div>)}
           {timers.length < MAX_TIMERS && <button className="add-timer" type="button" onClick={addTimer}>+ Add timer</button>}
+        </div>
+        <div className="pdf-import">
+          <input ref={fileInputRef} id="program-pdf" className="pdf-input" type="file" accept="application/pdf,.pdf" onChange={(event) => void importPdf(event.target.files?.[0])} disabled={importing} />
+          <label className="pdf-upload" htmlFor="program-pdf" aria-disabled={importing}>{importing ? 'Reading program...' : 'Upload program PDF'}</label>
+          {importStatus?.kind === 'success' && <p className="import-status success" role="status">{importStatus.message}</p>}
         </div>
       </aside>
 
@@ -264,6 +305,18 @@ function App() {
         </section>
       </div>
       {!controlsVisible && <button className="text-button reveal-controls" type="button" onClick={() => setControlsVisible(true)}>Show controls <kbd>H</kbd></button>}
+      {importStatus?.kind === 'error' && (
+        <div className="modal-backdrop" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setImportStatus(null)
+        }}>
+          <section className="error-modal" role="alertdialog" aria-modal="true" aria-labelledby="import-error-title" aria-describedby="import-error-message">
+            <p className="modal-eyebrow">PDF import</p>
+            <h2 id="import-error-title">Could not read program</h2>
+            <p id="import-error-message">{importStatus.message}</p>
+            <button className="modal-close" type="button" autoFocus onClick={() => setImportStatus(null)}>Close</button>
+          </section>
+        </div>
+      )}
     </main>
   )
 }

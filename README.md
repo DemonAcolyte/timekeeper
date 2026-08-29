@@ -5,12 +5,28 @@ TimeKeeper is an offline-friendly, browser-based countdown timer for conference 
 ## Features
 
 - Create up to five independently configured timers.
+- Import a program PDF and create timers from its most frequent schedule durations.
 - Start, pause, reset, and switch timers with keyboard shortcuts.
 - Display hours only while one hour or more remains, then switch to minutes and seconds.
 - Keep running timers accurate with timestamp-based calculations.
 - Save timers, the selected timer, and the color theme in browser local storage.
 - Use fullscreen and hide controls for a clean presenter view.
 - Choose light or dark mode.
+
+## Import A Program PDF
+
+Use **Upload program PDF** at the bottom of the timer sidebar. TimeKeeper reads schedule rows, groups matching durations by frequency, and creates up to five timers from the most common durations. A successful import replaces the existing timers.
+
+The importer supports:
+
+- Text-based PDFs with selectable text.
+- Schedule time ranges such as `08:30 AM - 09:00 AM` or `13:00 - 13:15`.
+- Explicit durations such as `5 mins` or `30 minutes`.
+- Multi-page schedule tables and text split by PDF letter spacing.
+
+Scanned or image-only PDFs are not supported. If schedule text cannot be selected and copied from a PDF viewer, the file requires OCR before importing.
+
+PDF processing happens entirely in the browser. TimeKeeper does not upload or save the source document.
 
 ## Run Locally
 
@@ -39,4 +55,4 @@ npm run build
 npm run preview
 ```
 
-The application stores data only in the current browser's local storage, so it works without a network connection after loading.
+The application stores timer data only in the current browser's local storage. PDF parsing is bundled with the application and requires no external service.
