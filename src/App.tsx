@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState } from 'react'
 
-const STORAGE_KEY = 'conference-timer-state'
+const STORAGE_KEY = 'timekeeper-state'
+const LEGACY_STORAGE_KEY = ['conference', 'timer', 'state'].join('-')
 const MAX_TIMERS = 5
 
 type Timer = {
@@ -56,7 +57,7 @@ function formatTime(totalSeconds: number, showHours: boolean) {
 
 function loadState(): SavedState {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
+    const stored = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY)
     if (!stored) return { timers: [defaultTimer], selectedId: defaultTimer.id, theme: 'dark' }
 
     const parsed = JSON.parse(stored) as SavedState | Timer[]
@@ -218,7 +219,7 @@ function App() {
 
       <div className="main-panel">
         <header className="topbar">
-          <p className="eyebrow">Conference clock</p>
+          <p className="eyebrow"><span className="brand-icon" aria-hidden="true" />TimeKeeper</p>
           <div className="header-actions">
             <button className="theme-toggle" type="button" onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
               {theme === 'dark' ? (

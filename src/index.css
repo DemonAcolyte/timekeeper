@@ -11,7 +11,8 @@ button { cursor: pointer; }
 .main-panel { min-width: 0; min-height: 100svh; padding: 26px clamp(20px, 5vw, 76px) 36px; display: grid; grid-template-rows: auto 1fr auto; }
 .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 38px; }
 .header-actions { display: flex; align-items: center; gap: 14px; }
-.eyebrow { margin: 0; color: var(--foreground); opacity: .65; text-transform: uppercase; font-size: 11px; letter-spacing: .18em; font-weight: 700; }
+.eyebrow { display: flex; align-items: center; gap: 7px; margin: 0; color: var(--foreground); opacity: .65; text-transform: uppercase; font-size: 13px; letter-spacing: .18em; font-weight: 700; }
+.brand-icon { width: 16px; height: 16px; flex: 0 0 auto; background: currentColor; mask: url('/favicon.svg') center / contain no-repeat; }
 .text-button { border: 0; color: var(--foreground); background: transparent; font-size: 13px; }
 .theme-toggle { display: grid; width: 40px; height: 40px; padding: 8px; place-items: center; border: 0; color: var(--foreground); background: transparent; }
 .theme-toggle svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
